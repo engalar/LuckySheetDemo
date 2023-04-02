@@ -23,7 +23,7 @@ async function injectDeps(deps) {
  * @param {string} containerId
  * @returns {Promise.<void>}
  */
-export async function Render(containerId) {
+export async function RenderSingle(containerId) {
 	// BEGIN USER CODE
 	const container = document.querySelector('#' + containerId);
 
@@ -31,10 +31,34 @@ export async function Render(containerId) {
 
 		//首次渲染
 		const [html] = await injectDeps('dojo/html');
+
 		html.set(container, `
-		<div id="luckysheet" style="margin:0px;padding:0px;position:absolute;width:100%;height:100%;left: 0px;top: 0px;">
+		<div class="show-btn">
+		<button>hide B C D</button>
+		<button>show B C D</button>
+		</div>
+		<div id="luckysheet" style="margin:0px;padding:0px;width:100%;height:100%;">
     </div>
 		`);
+
+		// 获取按钮的父元素
+		const buttonParent = document.querySelector('div');
+
+		// 添加点击事件监听器到父元素
+		buttonParent.addEventListener('click', (event) => {
+			// 检查点击的元素是否是一个按钮
+			if (event.target.tagName === 'BUTTON') {
+				// 获取与该按钮对应的文本
+				const content = event.target.textContent;
+				// TODO 列和行的隐藏一级展开收缩功能
+				if (content == 'hide B C D') {
+					luckysheet.hideColumn(1, 3)
+				} else {
+					luckysheet.showColumn(1, 3)
+				}
+			}
+		});
+
 
 		// According to the browser language
 		var lang = mx.session.sessionData.locale.code.split('_')[0];
@@ -205,6 +229,34 @@ export async function Render(containerId) {
 				rangePasteBefore: function (range, data) {
 					// console.info('rangePasteBefore',range,data)
 					// return false; //Can intercept paste
+
+					// 将字符串解析为DOM元素
+					var parser = new DOMParser();
+					var doc = parser.parseFromString(data, "text/html");
+
+					// 获取表格元素
+					var tableElem = doc.getElementsByTagName("table")[0];
+
+					if (tableElem) {
+
+						// 创建一个空数组来存储提取的数据
+						var data2 = [];
+
+						// 遍历表格中的每一行和每一列，将单元格中的数字存储到数组中
+						for (var i = 0, row; row = tableElem.rows[i]; i++) {
+							data2[i] = [];
+							for (var j = 0, col; col = row.cells[j]; j++) {
+								data2[i][j] = parseInt(col.innerText);
+							}
+						}
+
+						// TODO 从线下excel中批量复制数据粘贴至线上excel插件中
+						console.log(data2);
+					} else {
+						// 普通 字符串
+						console.log(data);
+					}
+
 				},
 
 
