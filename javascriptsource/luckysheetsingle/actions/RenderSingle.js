@@ -71,7 +71,8 @@ export async function RenderSingle(containerId) {
 			showtoolbar: true,
 			allowUpdate: true,
 			enableAddBackTop: false,
-			forceCalculation: false, cellRightClickConfig: {
+			forceCalculation: false,
+			cellRightClickConfig: {
 				copy: false, // copy
 				copyAs: false, // copy as
 				paste: false, // paste
@@ -127,7 +128,7 @@ export async function RenderSingle(containerId) {
 				pivotTable: false, //'PivotTable'
 				function: false, //'formula'
 				frozenMode: false, //'freeze mode'
-				sortAndFilter: false, //'Sort and filter'
+				sortAndFilter: true, //'Sort and filter'
 				conditionalFormat: false, //'Conditional Format'
 				dataVerification: false, // 'Data Verification'
 				splitColumn: false, //'Split column'
