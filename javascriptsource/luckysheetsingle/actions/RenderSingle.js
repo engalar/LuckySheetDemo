@@ -36,6 +36,10 @@ export async function RenderSingle(containerId) {
 		<div class="show-btn">
 		<button>hide B C D</button>
 		<button>show B C D</button>
+		<button>add yellow</button>
+		<button>remove yellow</button>
+		<button>add ps</button>
+		<button>remove ps</button>
 		</div>
 		<div id="luckysheet" style="margin:0px;padding:0px;width:100%;height:100%;">
     </div>
@@ -55,6 +59,27 @@ export async function RenderSingle(containerId) {
 					luckysheet.hideColumn(1, 3)
 				} else {
 					luckysheet.showColumn(1, 3)
+				}
+
+				if (content == 'add yellow') {
+					// create
+					luckysheet.setRangeConditionalFormatDefault("betweenness", [2, 10], {
+						cellrange: 'a1:d5', format: {
+							"textColor": "#000000",
+							"cellColor": "#ffff00"
+						}
+					});
+
+				} else if (content == 'remove yellow') {
+					// luckysheet.getluckysheetfile()[0].luckysheet_conditionformat_save
+					luckysheet.deleteRangeConditionalFormat(0)
+				}
+				if (content == 'add ps') {
+					luckysheet.getluckysheetfile()[0].data[0][0].ps = { isshow: true, left: 10, top: 10, width: 50, height: 50, value: 'some note' }
+					luckysheet.refresh();
+				} else if (content == 'remove ps') {
+					delete luckysheet.getluckysheetfile()[0].data[0][0].ps;
+					luckysheet.refresh();
 				}
 			}
 		});
@@ -124,7 +149,7 @@ export async function RenderSingle(containerId) {
 				image: false, // 'Insert picture'
 				link: false, // 'Insert link'
 				chart: false, //'chart' (the icon is hidden, but if the chart plugin is configured, you can still create a new chart by right click)
-				postil: false, //'comment'
+				postil: true, //'comment'
 				pivotTable: false, //'PivotTable'
 				function: false, //'formula'
 				frozenMode: false, //'freeze mode'
@@ -220,6 +245,7 @@ export async function RenderSingle(containerId) {
 				},
 				commentUpdateAfter: function (r, c, oldCell, newCell) {
 					// console.info(r, c, oldCell, newCell)
+					// TODO Comment
 				},
 				cellEditBefore: function (range) {
 					// console.info(range)
