@@ -75,11 +75,18 @@ export async function RenderSingle(containerId) {
 					luckysheet.deleteRangeConditionalFormat(0)
 				}
 				if (content == 'add ps') {
+					luckysheet.setCellValue(0, 0, 3);
 					luckysheet.getluckysheetfile()[0].data[0][0].ps = { isshow: true, left: 10, top: 10, width: 50, height: 50, value: 'some note' }
 					luckysheet.refresh();
+					
+					$('.luckysheet-iconfont-zhushi').click();
+					$('[itemvalue="showHideAllPs"]').click();
 				} else if (content == 'remove ps') {
 					delete luckysheet.getluckysheetfile()[0].data[0][0].ps;
 					luckysheet.refresh();
+					
+					$('.luckysheet-iconfont-zhushi').click();
+					$('[itemvalue="showHideAllPs"]').click();
 				}
 			}
 		});
