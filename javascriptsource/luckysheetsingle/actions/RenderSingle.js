@@ -17,6 +17,49 @@ async function injectDeps(deps) {
 		window.dojoDynamicRequire(deps, function () { resolve(Array.from(arguments)) });
 	});
 }
+
+function datagridgrowth(data, addr, addc) {
+	if (addr <= 0 && addc <= 0) {
+		return data;
+	}
+
+	if (addr <= 0) {
+		addr = 0;
+	}
+
+	if (addc <= 0) {
+		addc = 0;
+	}
+
+	let dataClen = 0;
+	if (data.length == 0) {
+		data = [];
+		dataClen = 0;
+	}
+	else {
+		dataClen = data[0].length;
+	}
+
+	let coladd = [];//需要额外增加的空列
+	for (let c = 0; c < addc; c++) {
+		coladd.push(null);
+	}
+
+	let rowadd = [];//完整的一个空行
+	for (let r = 0; r < dataClen + addc; r++) {
+		rowadd.push(null);
+	}
+
+	for (let r = 0; r < data.length; r++) {
+		data[r] = [].concat(data[r].concat(coladd));
+	}
+
+	for (let r = 0; r < addr; r++) {
+		data.push([].concat(rowadd));
+	}
+
+	return data;
+}
 // END EXTRA CODE
 
 /**
@@ -40,6 +83,8 @@ export async function RenderSingle(containerId) {
 		<button>remove yellow</button>
 		<button>add ps</button>
 		<button>remove ps</button>
+		<button>more data</button>
+		<button>scroll row15</button>
 		</div>
 		<div id="luckysheet" style="margin:0px;padding:0px;width:100%;height:100%;">
     </div>
@@ -54,6 +99,36 @@ export async function RenderSingle(containerId) {
 			if (event.target.tagName === 'BUTTON') {
 				// 获取与该按钮对应的文本
 				const content = event.target.textContent;
+				if (content == 'scroll row15') {
+					luckysheet.scroll({ targetRow: 14 });
+					// $("#luckysheet-scrollbar-y") 用jquery监听滚动事件
+				}
+				if (content == 'more data') {
+					// TODO big data
+					const data = luckysheet.getluckysheetfile()[0].data;
+					const rl = data.length, cl = data[0].length;
+
+					datagridgrowth(luckysheet.getluckysheetfile()[0].data, 100 - rl - 1, 80 - cl - 1);
+
+					//luckysheet.luckysheetextendData(0, []);
+					luckysheet.updataSheet({ data: luckysheet.getluckysheetfile() })
+
+					const rows = 90;
+					const columns = 70;
+
+					for (let i = 0; i < rows; i++) {
+						for (let j = 0; j < columns; j++) {
+							//luckysheet.setCellValue(i, j, i + '' + j, { isRefresh: false });
+							luckysheet.getluckysheetfile()[0].data[i][j] = {
+								"v": i + '_' + j,
+								"ct": { "fa": "General", "t": "n" },
+								"m": i + '' + j
+							}
+						}
+					}
+
+					luckysheet.refresh();
+				}
 				// TODO 列和行的隐藏一级展开收缩功能
 				if (content == 'hide B C D') {
 					luckysheet.hideColumn(1, 3)
@@ -78,13 +153,13 @@ export async function RenderSingle(containerId) {
 					luckysheet.setCellValue(0, 0, 3);
 					luckysheet.getluckysheetfile()[0].data[0][0].ps = { isshow: true, left: 10, top: 10, width: 50, height: 50, value: 'some note' }
 					luckysheet.refresh();
-					
+
 					$('.luckysheet-iconfont-zhushi').click();
 					$('[itemvalue="showHideAllPs"]').click();
 				} else if (content == 'remove ps') {
 					delete luckysheet.getluckysheetfile()[0].data[0][0].ps;
 					luckysheet.refresh();
-					
+
 					$('.luckysheet-iconfont-zhushi').click();
 					$('[itemvalue="showHideAllPs"]').click();
 				}
@@ -95,6 +170,8 @@ export async function RenderSingle(containerId) {
 		// According to the browser language
 		var lang = mx.session.sessionData.locale.code.split('_')[0];
 		var options = {
+			row: 10,
+			column: 5,
 			container: 'luckysheet',
 			lang: lang,
 			showinfobar: false,
@@ -285,7 +362,7 @@ export async function RenderSingle(containerId) {
 						}
 
 						// TODO 从线下excel中批量复制数据粘贴至线上excel插件中
-						console.log(data2);
+						console.log(luckysheet.getcellvalue(range[0].row[0], range[0].column[0]), data2);
 					} else {
 						// 普通 字符串
 						console.log(data);
@@ -313,7 +390,9 @@ export async function RenderSingle(containerId) {
 				}
 			}]
 		}
+
 		luckysheet.create(options);
+
 	} else {
 
 	}
