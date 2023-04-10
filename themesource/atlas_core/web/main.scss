@@ -1,6 +1,4 @@
 // Default variables
-.main {
-
 @import "exclusion-variables";
 @import "../../../theme/web/exclusion-variables";
 @import "variables";
@@ -375,7 +373,4 @@
 @import "layouts/layout-atlas-tablet";
 @if not $exclude-layout-atlas-tablet {
     @include layout-atlas-tablet();
-}
-
-
 }

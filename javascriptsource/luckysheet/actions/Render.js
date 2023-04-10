@@ -182,6 +182,7 @@ export async function Render(containerId, sheetTitle, collaborate, url) {
 		<iframe id="${iframeId}" src="resources/luckysheet.html?widgetid=${containerId}" style="
     width: 100%;
     height: 100%;
+	min-height:500px;
     border: 0;
 "></iframe>
 		`);

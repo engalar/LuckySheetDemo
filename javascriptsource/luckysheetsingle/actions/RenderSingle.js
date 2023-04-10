@@ -68,12 +68,25 @@ function datagridgrowth(data, addr, addc) {
  */
 export async function RenderSingle(containerId) {
 	// BEGIN USER CODE
+	const [html, aspect] = await injectDeps(['dojo/html', 'dojo/aspect']);
+	var myWidget = dojo.dijit.registry.byId(containerId);
+
+	myWidget.addOnDestroy(function () {
+		console.log("Widget destroyed!");
+		$(document).off("mousemove.luckysheetEvent mouseup.luckysheetEvent");
+		//luckysheet.destroy();
+	});
+	aspect.after(myWidget, 'resize', function () {
+		console.log("Widget resized!");
+
+	});
+
+	const luckysheet_id = dijit.registry.getUniqueId('luckysheet');
 	const container = document.querySelector('#' + containerId);
 
 	if (container.innerHTML == '') {
 
 		//首次渲染
-		const [html] = await injectDeps('dojo/html');
 
 		html.set(container, `
 		<div class="show-btn">
@@ -85,8 +98,9 @@ export async function RenderSingle(containerId) {
 		<button>remove ps</button>
 		<button>more data</button>
 		<button>scroll row15</button>
+		<button>Formula</button>
 		</div>
-		<div id="luckysheet" style="margin:0px;padding:0px;width:100%;height:100%;">
+		<div id="${luckysheet_id}" style="margin:0px;padding:0px;width:100%;height:100%;min-height:500px;">
     </div>
 		`);
 
@@ -99,6 +113,32 @@ export async function RenderSingle(containerId) {
 			if (event.target.tagName === 'BUTTON') {
 				// 获取与该按钮对应的文本
 				const content = event.target.textContent;
+				if (content == 'Formula') {
+					luckysheet.setCellValue(0, 0, 1);
+					luckysheet.setCellValue(0, 1, 'a');
+
+
+					luckysheet.setCellValue(1, 0, 2);
+					luckysheet.setCellValue(1, 1, 'b');
+
+
+					luckysheet.setCellValue(2, 0, 3);
+					luckysheet.setCellValue(2, 1, 'c');
+
+
+					luckysheet.setCellValue(3, 0, 4);
+					luckysheet.setCellValue(3, 1, 'd');
+
+
+					luckysheet.setCellValue(0, 2, 2);
+
+					luckysheet.setCellValue(0, 3, { f: "=VLOOKUP(c1,A1:B17,2)", bg: "#00FF00" });
+					luckysheet.refreshFormula();
+
+					// open filter
+					$('#luckysheet-icon-autofilter').click();
+					$('[itemvalue="filter"]').click();
+				}
 				if (content == 'scroll row15') {
 					luckysheet.scroll({ targetRow: 14 });
 					// $("#luckysheet-scrollbar-y") 用jquery监听滚动事件
@@ -172,7 +212,7 @@ export async function RenderSingle(containerId) {
 		var options = {
 			row: 10,
 			column: 5,
-			container: 'luckysheet',
+			container: luckysheet_id,
 			lang: lang,
 			showinfobar: false,
 			showsheetbar: true,
@@ -204,7 +244,7 @@ export async function RenderSingle(containerId) {
 				data: false, // data verification
 				cellFormat: false // Set cell format
 			},
-			sheetFormulaBar: false,
+			sheetFormulaBar: true,
 			showinfobar: false,
 			showsheetbar: false,
 			showstatisticBar: false,
@@ -235,7 +275,7 @@ export async function RenderSingle(containerId) {
 				chart: false, //'chart' (the icon is hidden, but if the chart plugin is configured, you can still create a new chart by right click)
 				postil: true, //'comment'
 				pivotTable: false, //'PivotTable'
-				function: false, //'formula'
+				function: true, //'formula'
 				frozenMode: false, //'freeze mode'
 				sortAndFilter: true, //'Sort and filter'
 				conditionalFormat: false, //'Conditional Format'
