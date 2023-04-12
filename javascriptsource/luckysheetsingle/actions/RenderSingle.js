@@ -432,6 +432,9 @@ export async function RenderSingle(containerId) {
 			}]
 		}
 
+		setTimeout(() => {
+			on.emit(container, '_loaded', {});
+		}, 1+500+20);
 		luckysheet.create(options);
 
 	} else {
