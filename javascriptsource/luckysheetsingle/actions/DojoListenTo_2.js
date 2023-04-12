@@ -32,12 +32,10 @@ export async function DojoListenTo_2(targetId) {
 	const [on, lang] = await injectDeps(["dojo/on", "dojo/_base/lang"]);
 	const container = document.querySelector('#' + targetId);
 
-	const disp = on(container, 'updated', (operate) => {
-		console.log('updated', operate);
+	const disp = on(container, 'updated', ({data: {operate}}) => {
 	});
 
 	onDestroy(targetId, () => {
-		console.log('dispose widget ' + targetId);
 		disp.remove();
 	})
 	// END USER CODE

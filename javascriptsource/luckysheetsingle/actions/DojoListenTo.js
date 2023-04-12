@@ -32,7 +32,7 @@ export async function DojoListenTo(targetId) {
 	const [on, lang] = await injectDeps(["dojo/on", "dojo/_base/lang"]);
 	const container = document.querySelector('#' + targetId);
 
-	const disp = on(container, 'updated', (operate) => {
+	const disp = on(container, 'updated', ({data: {operate}}) => {
 		console.log('updated', operate);
 	});
 

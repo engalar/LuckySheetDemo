@@ -339,7 +339,7 @@ export async function RenderSingle_2(containerId) {
 					// console.info(data,sheetFile,ctx)
 				},
 				updated: function (operate) {
-					on.emit(container, 'updated', operate);
+					on.emit(container, 'updated', {data:{operate}});
 				},
 				cellUpdateBefore: function (r, c, value, isRefresh) {
 					// console.info('cellUpdateBefore',r,c,value,isRefresh)
@@ -433,7 +433,7 @@ export async function RenderSingle_2(containerId) {
 		}
 
 		setTimeout(() => {
-			on.emit(container, '_loaded', {});
+			on.emit(container, '_loaded', {data:{}});
 		}, 1+500+20);
 		luckysheet.create(options);
 

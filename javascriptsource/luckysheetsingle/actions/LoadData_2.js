@@ -47,14 +47,20 @@ export async function LoadData_2(targetId, myEntity) {
 	const [on, lang] = await injectDeps(["dojo/on", "dojo/_base/lang"]);
 	const container = document.querySelector('#' + targetId);
 
+	const objsCache = [];
+
 	const disp = on(container, '_loaded', () => {
-		console.log('_loaded', myEntity);
 		// Your logic
 		mx.data.get({
 			xpath: "//" + myEntity,
 			callback: function (objs) {
-				console.log("Received " + objs.length + " MxObjects");
 				if (objs.length) {
+					objs.forEach((e, r) => {
+
+						objsCache.push(mx.data.subscribe({ guid: e.getGuid() }, () => {
+
+						}));
+					})
 					const obj = objs[0];
 
 					let attributes = obj.getAttributes();
@@ -106,15 +112,20 @@ export async function LoadData_2(targetId, myEntity) {
 									}
 								],
 							}
-						})
+						});
+
+					on.emit(container, 'mx.data.get', { data: { objs, cols:filtered_attributes } });
+
 				}
 			}
 		});
 	});
 
 	onDestroy(targetId, () => {
-		console.log('dispose widget ' + targetId);
 		disp.remove();
+		objsCache.forEach((e, r) => {
+			e.unsubscribe();
+		})
 	})
 	// END USER CODE
 }
