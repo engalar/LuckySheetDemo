@@ -68,7 +68,8 @@ function datagridgrowth(data, addr, addc) {
  */
 export async function RenderSingle(containerId) {
 	// BEGIN USER CODE
-	const [html, aspect] = await injectDeps(['dojo/html', 'dojo/aspect']);
+	const [html, aspect, on] = await injectDeps(['dojo/html', 'dojo/aspect', "dojo/on"]);
+
 	var myWidget = dojo.dijit.registry.byId(containerId);
 
 	myWidget.addOnDestroy(function () {
@@ -338,7 +339,7 @@ export async function RenderSingle(containerId) {
 					// console.info(data,sheetFile,ctx)
 				},
 				updated: function (operate) {
-					// console.info(operate)
+					on.emit(container, 'updated', operate);
 				},
 				cellUpdateBefore: function (r, c, value, isRefresh) {
 					// console.info('cellUpdateBefore',r,c,value,isRefresh)
