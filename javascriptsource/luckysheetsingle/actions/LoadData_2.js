@@ -21,6 +21,20 @@ function onDestroy(containerId, cb) {
 
 	myWidget.addOnDestroy(cb);
 }
+
+function convertToExcelColumn(num) {
+	let result = '';
+	while (num > 0) {
+		let remainder = num % 26;
+		if (remainder === 0) {
+			remainder = 26;
+			num--;
+		}
+		result = String.fromCharCode(remainder + 64) + result;
+		num = Math.floor(num / 26);
+	}
+	return result;
+}
 // END EXTRA CODE
 
 /**
@@ -47,11 +61,52 @@ export async function LoadData_2(targetId, myEntity) {
 					let filtered_attributes = attributes.filter(attr => !attr.includes('.'));
 
 
-
 					for (let i = 0; i < filtered_attributes.length; i++) {
 
-						luckysheet.setCellValue(0, i, filtered_attributes[i])
+						luckysheet.setCellValue(0, i, filtered_attributes[i]);
+						objs.forEach((e, r) => {
+							const v = e.get(filtered_attributes[i]);
+							luckysheet.setCellValue(r + 1, i, v.toNumber ? v.toNumber() : v);
+						})
 					}
+
+					// lock cell
+					const sqref = "$A$2:$" + convertToExcelColumn(filtered_attributes.length) + "$" + (objs.length + 1);
+					luckysheet.setConfig(
+						{
+							"authority": {//Permission configuration of the current worksheet
+								selectLockedCells: 1, //Select locked cells
+								selectunLockedCells: 1, //Select unlocked cells
+								formatCells: 1, //Format cells
+								formatColumns: 1, //Format columns
+								formatRows: 1, //Format rows
+								insertColumns: 1, //Insert columns
+								insertRows: 1, //Insert rows
+								insertHyperlinks: 1, //Insert hyperlinks
+								deleteColumns: 1, //Delete columns
+								deleteRows: 1, //Delete rows
+								sort: 1, //Sort
+								filter: 1, //Filter
+								usePivotTablereports: 1, //Use Pivot Table reports
+								editObjects: 1, //Edit objects
+								editScenarios: 1, //Edit scenarios   
+								sheet: 1, //If it is 1 or true, the worksheet is protected; if it is 0 or false, the worksheet is not protected.
+								hintText: "", //The text of the pop-up prompt
+								algorithmName: "None",//Encryption scheme: MD2,MD4,MD5,RIPEMD-128,RIPEMD-160,SHA-1,SHA-256,SHA-384,SHA-512,WHIRLPOOL
+								saltValue: null, //The salt parameter for password decryption is a random value set by yourself
+
+								allowRangeList: [
+									{ //Range protection
+										name: "area", //Name
+										//password: "1", //Password
+										//hintText: "", //Prompt text
+										//algorithmName: "None",//Encryption scheme: MD2,MD4,MD5,RIPEMD-128,RIPEMD-160,SHA-1,SHA-256,SHA-384,SHA-512,WHIRLPOOL
+										//saltValue: null, //The salt parameter for password decryption is a random value set by yourself
+										sqref //Protected range
+									}
+								],
+							}
+						})
 				}
 			}
 		});
