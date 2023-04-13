@@ -114,7 +114,7 @@ export async function LoadData_2(targetId, myEntity) {
 							}
 						});
 
-					on.emit(container, 'mx.data.get', { data: { objs, cols:filtered_attributes } });
+					on.emit(container, 'mx.data.get', { data: { objs, cols: filtered_attributes } });
 
 				}
 			}
@@ -125,7 +125,15 @@ export async function LoadData_2(targetId, myEntity) {
 		disp.remove();
 		objsCache.forEach((e, r) => {
 			e.unsubscribe();
-		})
+		});
+		var data = luckysheet.getluckysheetfile()[0].data;
+
+		for (var i = 0; i < data.length; i++) {
+			for (var j = 0; j < data[i].length; j++) {
+				data[i][j] = null;
+			}
+		}
+
 	})
 	// END USER CODE
 }
