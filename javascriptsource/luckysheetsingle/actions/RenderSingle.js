@@ -128,32 +128,34 @@ export async function RenderSingle(containerId) {
 				luckysheet.scroll({ targetRow: 14 });
 				// $("#luckysheet-scrollbar-y") 用jquery监听滚动事件
 			}
+
 			if (content == 'more data') {
-				// TODO big data
 				const data = luckysheet.getluckysheetfile()[0].data;
 				const rl = data.length, cl = data[0].length;
 
-				datagridgrowth(luckysheet.getluckysheetfile()[0].data, 100 - rl - 1, 80 - cl - 1);
-
-				//luckysheet.luckysheetextendData(0, []);
-				luckysheet.updataSheet({ data: luckysheet.getluckysheetfile() })
+				const d = datagridgrowth(data, 100 - rl - 1, 80 - cl - 1);
 
 				const rows = 90;
 				const columns = 70;
 
 				for (let i = 0; i < rows; i++) {
 					for (let j = 0; j < columns; j++) {
-						//luckysheet.setCellValue(i, j, i + '' + j, { isRefresh: false });
-						luckysheet.getluckysheetfile()[0].data[i][j] = {
+						d[i][j] = {
 							"v": i + '_' + j,
 							"ct": { "fa": "General", "t": "n" },
 							"m": i + '' + j
 						}
 					}
 				}
-
-				luckysheet.refresh();
+				
+				const cfg = luckysheet.getluckysheetfile()[0].config;
+				const allParam = {
+					"cfg": cfg,
+					"RowlChange": true
+				};
+				luckysheet.jfrefreshgrid(d, null, allParam);
 			}
+
 			// TODO 列和行的隐藏一级展开收缩功能
 			if (content == 'hide B C D') {
 				luckysheet.hideColumn(1, 3)
@@ -195,7 +197,7 @@ export async function RenderSingle(containerId) {
 	// According to the browser language
 	var lang = mx.session.sessionData.locale.code.split('_')[0];
 	var options = {
-		row: 10,
+		row: 50,
 		column: 5,
 		container: luckysheet_id,
 		lang: lang,

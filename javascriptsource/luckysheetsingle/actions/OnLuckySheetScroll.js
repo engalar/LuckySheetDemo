@@ -21,6 +21,66 @@ function onDestroy(containerId, cb) {
 
 	myWidget.addOnDestroy(cb);
 }
+async function fetchPage(entity, nameAtts, offset, amount) {
+	return await new Promise((resolve, reject) => {
+		mx.data.get({
+			//Entity_2
+			xpath: '//' + entity,
+			count: true, filter: {
+				attributes: nameAtts,
+				sort: [['Name', 'asc']],
+				offset,
+				amount,
+				references: { 'LuckySheetSingle.Main_Item': { attributes: ['Date', 'Size'], sort: [['Date', 'asc']] } }
+			}, callback: (objs, extra) => {
+				resolve([objs, extra]);
+			}
+		});
+	});
+
+}
+function datagridgrowth(data, addr, addc) {
+	if (addr <= 0 && addc <= 0) {
+		return data;
+	}
+
+	if (addr <= 0) {
+		addr = 0;
+	}
+
+	if (addc <= 0) {
+		addc = 0;
+	}
+
+	let dataClen = 0;
+	if (data.length == 0) {
+		data = [];
+		dataClen = 0;
+	}
+	else {
+		dataClen = data[0].length;
+	}
+
+	let coladd = [];//需要额外增加的空列
+	for (let c = 0; c < addc; c++) {
+		coladd.push(null);
+	}
+
+	let rowadd = [];//完整的一个空行
+	for (let r = 0; r < dataClen + addc; r++) {
+		rowadd.push(null);
+	}
+
+	for (let r = 0; r < data.length; r++) {
+		data[r] = [].concat(data[r].concat(coladd));
+	}
+
+	for (let r = 0; r < addr; r++) {
+		data.push([].concat(rowadd));
+	}
+
+	return data;
+}
 // END EXTRA CODE
 
 /**
@@ -35,19 +95,85 @@ export async function OnLuckySheetScroll(targetId) {
 	const disp = on(container, '_loaded', () => {
 		// Your logic start
 		var horizontalScrollBar = container.querySelector('.luckysheet-scrollbar-y');
-		horizontalScrollBar.addEventListener('scroll', function (e) {
-			const from = Math.ceil(horizontalScrollBar.scrollTop / 20) + 1;
+		let hasMoreItems = true;
+		horizontalScrollBar.addEventListener('scroll', function onscroll(e) {
+			const fr = Math.ceil(horizontalScrollBar.scrollTop / 20) + 1;
 			const to = Math.ceil((horizontalScrollBar.scrollTop + horizontalScrollBar.clientHeight) / 20) - 1;
 			const isScrollbarAtBottom = horizontalScrollBar.scrollTop + horizontalScrollBar.clientHeight >= horizontalScrollBar.scrollHeight;
-			console.log(from, to, isScrollbarAtBottom);
+			console.log(fr, to, isScrollbarAtBottom);
+
+
+			if (isScrollbarAtBottom && hasMoreItems) {
+
+
+				let rawData = luckysheet.getluckysheetfile()[0].data;
+				const rl = rawData.length, //原数据行数
+					cl = rawData[0].length; //原数据列数
+				fetchPage('LuckySheetSingle.Main', ['Name'], rl, 5).then(([objs, extra]) => {
+					hasMoreItems = extra.hasMoreItems;
+					if (objs.length == 0) return;
+
+					// 创建一个空数组，用于存储所有父实体的数据数组
+					const result = [];
+
+					// 遍历每个父实体
+					for (const obj of objs) {
+						// 创建一个临时数组，用于存储当前父实体的数据
+						const data = [];
+
+						// 将父实体的 Name 属性值添加到临时数组
+						data.push(obj.get('Name'));
+
+						// 获得当前父实体的子实体集
+						const childObjs = obj.getChildren('LuckySheetSingle.Main_Item');
+
+						// 遍历子实体集
+						for (const childObj of childObjs) {
+							// 将子实体的 Date 和 Size 属性值依次添加到临时数组
+							data.push(childObj.get('Date').toNumber());
+							data.push(childObj.get('Size').toNumber());
+						}
+
+						// 将当前父实体的数据数组添加到结果数组
+						result.push(data);
+					}
+
+					// 确定 col_add 的值
+					const col_add = result[0].length - rawData[0].length;
+
+					// 调用 datagridgrowth 函数增加列与合成数组对齐
+					rawData = datagridgrowth(rawData, 0, col_add);
+
+					// 遍历 result 部分的值
+					for (let i = 0; i < result.length; i++) {
+						for (let j = 0; j < result[i].length; j++) {
+							result[i][j] = {
+								"v": result[i][j],
+								"ct": { "fa": "General", "t": "n" },
+								"m": result[i][j]
+							};
+						}
+
+						// 将合成数组追加到 rawData 后面
+						rawData.push(result[i]);
+					}
+
+					const cfg = luckysheet.getluckysheetfile()[0].config;
+					const allParam = {
+						"cfg": cfg,
+						"RowlChange": true
+					};
+					luckysheet.jfrefreshgrid(rawData, null, allParam);
+				})
+			}
+		});
+
+		onDestroy(targetId, () => {
+			console.log('dispose widget ' + targetId);
+			disp.remove();
+			horizontalScrollBar.removeEventListener('scroll', onscroll);
 		});
 		// Your logic end
 	});
-
-	onDestroy(targetId, () => {
-		console.log('dispose widget ' + targetId);
-		disp.remove();
-		horizontalScrollBar.removeEventListener('scroll');
-	})
 	// END USER CODE
 }
